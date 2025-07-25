@@ -2,36 +2,30 @@ name: CI: Integration, Dependency Check, UI Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   integration-test:
-    name: Integration Test with Docker Compose
     runs-on: ubuntu-latest
-
-    services:
-      docker:
-        image: docker:20.10.7
-        options: --privileged
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Start Docker containers
+      - name: Set up Docker Compose
         run: |
           docker-compose -f nginx-proxy/nginx-compose.yml up -d
-          sleep 10  # give services time to start
+          sleep 10
 
-      - name: UI Test - Check index.html is served
+      - name: UI Test - Check index.html loads
         run: |
           curl -s -o /dev/null -w "%{http_code}" http://localhost | grep 200
 
   dependency-check:
-    name: OWASP Dependency Check
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,8 +33,8 @@ jobs:
       - name: Run OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
-          project: "MyWebApp"
-          path: .
+          project: "SecureWebApp"
+          path: "."
           format: "HTML"
           out: "dependency-check-report"
 
