@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Search Page</title>
+  <style>
+    #results { display: none; }
+    #error { color: red; }
+  </style>
+</head>
+<body>
+  <div id="search-form">
+    <h1>Welcome</h1>
+    <form id="searchForm">
+      <label for="search">Enter your search term:</label>
+      <input type="text" id="search" required>
+      <button type="submit">Search</button>
+    </form>
+    <p id="error"></p>
+  </div>
+
+  <div id="results">
+    <h2 id="result-output"></h2>
+    <button id="backBtn">Back to Search</button>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const safePattern = /^[\w\s\-_,.?!]{1,100}$/;
+    const sqlPattern = /('|--|;|\/\*|\*\/|=|select|insert|drop|delete|update|union|where|or\s+1=1)/i;
+
+    $('searchForm').onsubmit = e => {
+      e.preventDefault();
+      const term = $('search').value.trim();
+
+      if (!safePattern.test(term)) return showError('XSS/SQL injection pattern detected. Please refine your search.');
+      if (sqlPattern.test(term)) return showError('XSS/SQL injection pattern detected. Please refine your search.');
+
+      showResult(term);
+    };
+
+    $('backBtn').onclick = () => {
+      $('search').value = '';
+      toggleView(true);
+    };
+
+    function showResult(term) {
+      $('result-output').textContent = `You searched for: ${escapeHTML(term)}`;
+      toggleView(false);
+    }
+
+    function showError(msg) {
+      $('error').textContent = msg;
+      $('search').value = '';
+    }
+
+    function toggleView(showForm) {
+      $('search-form').style.display = showForm ? 'block' : 'none';
+      $('results').style.display = showForm ? 'none' : 'block';
+      $('error').textContent = '';
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;'}[c]));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "2309180@SIT.singaporetech.edu.sg"
+      MYSQL_DATABASE: secure_app
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: "2309180@SIT.singaporetech.edu.sg"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  git-server:
+    build:
+      context: .
+      dockerfile: gitserver.Dockerfile
+    container_name: git_server
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./repos:/home/git
+      - ./repos:/var/www/git
+
+
